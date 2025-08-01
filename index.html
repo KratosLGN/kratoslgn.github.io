@@ -1,1160 +1,524 @@
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <meta name="apple-mobile-web-app-capable" content="yes">
-
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <meta name="apple-mobile-web-app-title" content="Fsociety TV">
-
   <link rel="apple-touch-icon" href="https://fsociety.lat/images/logo.png">
-
   <link rel="icon" type="image/jpg" href="https://fsociety.lat/images/logo.png"/>
-
   <title>Fsociety TV | Hackeando la señal</title>
-
   <!-- Bootstrap 5.3 CSS -->
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <!-- Font Awesome 6 -->
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <!-- Video.js CSS -->
-
   <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet">
-
   <style>
-
     :root {
-
       --bg-dark: #0c0c0c;
-
       --accent-green: #00ff41;
-
       --accent-dark: #003b1f;
-
       --text-primary: #e0e0e0;
-
       --text-secondary: #aaaaaa;
-
       --glitch-time: 0.8s;
-
     }
-
     body {
-
       font-family: 'Consolas', 'Courier New', monospace;
-
       background-color: var(--bg-dark);
-
       color: var(--text-primary);
-
       overflow-x: hidden;
-
       overflow-y: hidden;
-
       scrollbar-width: none;
-
       line-height: 1.6;
-
     }
-
     .scanlines {
-
       position: fixed; top:0; left:0;
-
       width:100%; height:100%;
-
       background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%);
-
       background-size:100% 2px;
-
       pointer-events:none; z-index:1000; opacity:0.6;
-
     }
-
-
 
     /* Loading Screen */
-
     .loading-screen {
-
       position: fixed;
-
       top: 0;
-
       left: 0;
-
       width: 100%;
-
       height: 100%;
-
       background-color: var(--bg-dark);
-
       z-index: 9999;
-
       display: flex;
-
       flex-direction: column;
-
       justify-content: center;
-
       align-items: center;
-
     }
-
-
 
     .matrix-rain {
-
       position: absolute;
-
       top: 0;
-
       left: 0;
-
       width: 100%;
-
       height: 100%;
-
       opacity: 0.3;
-
       z-index: 1;
-
     }
-
-
 
     .loading-content {
-
       position: relative;
-
       z-index: 2;
-
       text-align: center;
-
     }
-
-
 
     .loading-spinner {
-
       color: var(--accent-green);
-
       font-size: 3rem;
-
     }
-
-
 
     .loading-text {
-
       color: var(--accent-green);
-
       font-size: 1.5rem;
-
       margin-top: 1rem;
-
       text-align: center;
-
     }
-
-
 
     .header { border-bottom:1px solid var(--accent-green); padding:1rem 0; position:relative; z-index:100; }
-
     .logo { color:var(--accent-green); font-weight:bold; font-size:1.8rem; text-decoration:none; transition:0.3s; position:relative; }
-
     .logo:hover { text-shadow:0 0 10px var(--accent-green); }
-
     .slogan { color:var(--text-secondary); font-size:0.9rem; margin-left:1rem; }
-
     .main-container { display:flex; flex-direction:row; min-height:calc(100vh - 120px); }
-
     @media (max-width:768px){ .main-container{ flex-direction:column } }
-
     .player-section { flex:60%; padding:1rem; }
-
     .player-container { width:100%; padding-bottom:56.25%; position:relative; background:#000; border:1px solid var(--accent-dark); }
-
     #iptv-player { position:absolute; top:0; left:0; width:100%; height:100%; }
-
+    .player-container iframe { width:100%; height:100%; border:none; position:absolute; top:0; left:0; }
     .vjs-theme-fsociety { --vjs-theme-fsociety--primary:var(--accent-green); --vjs-theme-fsociety--secondary:var(--bg-dark); }
-
     .vjs-theme-fsociety .vjs-big-play-button { background:rgba(0,255,65,0.2); border-color:var(--accent-green); }
-
     .vjs-theme-fsociety .vjs-control-bar { background:rgba(12,12,12,0.8); color:var(--accent-green); }
-
     .vjs-theme-fsociety .vjs-play-progress { background-color:var(--accent-green); }
-
     .channel-section { flex:40%; padding:1rem; border-left:1px solid var(--accent-dark); overflow:hidden; }
-
     @media (max-width:768px){ .channel-section{ border-left:none; border-top:1px solid var(--accent-dark) } }
-
     .channel-search { position:relative; margin-bottom:1rem; }
-
     .channel-search input {
-
-  width: 100%;
-
-  padding: .5rem 1rem;
-
-  background: #111;
-
-  border: 1px solid var(--accent-dark);
-
-  color: var(--accent-green);
-
-  border-radius: 16px; /* Bordes redondeados similares a iOS */
-
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Agregar sombra sutil en el input */
-
-}
-
+      width: 100%;
+      padding: .5rem 1rem;
+      background: #111;
+      border: 1px solid var(--accent-dark);
+      color: var(--accent-green);
+      border-radius: 16px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
     .channel-search i { position:absolute; right:15px; top:10px; color:var(--accent-green); }
-
     .channel-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:1rem; max-height:calc(100vh - 250px); overflow-y:auto; padding-right:.5rem; justify-items: center; }
-
     .channel-item {
-
-  background: #111;
-
-  border: 1px solid #d3d3d3; /* Borde gris claro */
-
-  padding: 1rem;
-
-  text-align: center;
-
-  cursor: pointer;
-
-  transition: 0.3s;
-
-  position: relative;
-
-  border-radius: 16px; 
-
-  width: 120px;
-
-  height: 120px;
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-
-} /* Sombra sutil para imitar el estilo de iOS */
-
-}
-
-
-
-.channel-item:hover .channel-logo {
-
-  filter: grayscale(0%) brightness(1.2);
-
-}
-
-
-
-.channel-item.active {
-
-  background: rgba(0, 255, 65, 0.1);
-
-  border-color: var(--accent-green);
-
-}
-
-   .channel-logo {
-
-  width: 100%;
-
-  height: 60px;
-
-  object-fit: contain;
-
-  margin-bottom: .5rem;
-
-  filter: grayscale(30%);
-
-  transition: 0.3s;
-
-}
-
-    .channel-item:hover .channel-logo { filter:grayscale(0%) brightness(1.2); }
-
+      background: #111;
+      border: 1px solid #d3d3d3;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      position: relative;
+      border-radius: 16px;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+    .channel-item:hover .channel-logo {
+      filter: grayscale(0%) brightness(1.2);
+    }
+    .channel-item.active {
+      background: rgba(0, 255, 65, 0.1);
+      border-color: var(--accent-green);
+    }
+    .channel-logo {
+      width: 100%;
+      height: 60px;
+      object-fit: contain;
+      margin-bottom: .5rem;
+      filter: grayscale(30%);
+      transition: 0.3s;
+    }
     .channel-name { display:none;font-size:0.8rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
     .glitch-effect { position:relative; }
-
     .glitch-effect:hover::before,
-
     .glitch-effect:hover::after { content:attr(data-text); position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.8; }
-
     .glitch-effect:hover::before { color:#0ff; z-index:-1; animation:glitch var(--glitch-time) infinite; }
-
     .glitch-effect:hover::after  { color:#f0f; z-index:-2; animation:glitch var(--glitch-time) infinite reverse; }
-
     @keyframes glitch { 0%{transform:translate(0)}20%{transform:translate(-2px,2px)}40%{transform:translate(-2px,-2px)}60%{transform:translate(2px,2px)}80%{transform:translate(2px,-2px)}100%{transform:translate(0)} }
-
     .footer { border-top:1px solid var(--accent-dark); padding:1rem 0; color:var(--text-secondary); font-size:0.8rem; }
-
     .status-indicator { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; }
-
     .status-online { background:var(--accent-green); box-shadow:0 0 5px var(--accent-green); }
-
     .status-offline { background:#ff0000; }
-
     .modal-content, .modal-header, .modal-footer { background:var(--bg-dark); border-color:var(--accent-dark); color:var(--text-primary); }
-
     .btn-fsociety { background:transparent; border:1px solid var(--accent-green); color:var(--accent-green); transition:0.3s; }
-
     .btn-fsociety:hover { background:var(--accent-green); color:var(--bg-dark); box-shadow:0 0 10px var(--accent-green); }
-
   </style>
-
 </head>
-
 <body>
-
   <!-- Loading Screen -->
-
   <div class="loading-screen" id="loadingScreen">
-
     <!-- MATRIX ESP Animation -->
-
     <canvas id="matrixRain" class="matrix-rain"></canvas>
-
     <div class="loading-content">
-
       <div class="loading-spinner">
-
         <i class="fas fa-circle-notch fa-spin"></i>
-
       </div>
-
       <div class="loading-text">Cargando Fsociety TV...</div>
-
     </div>
-
   </div>
-
-
 
   <header class="header">
-
     <div class="container">
-
       <div class="row align-items-center">
-
         <div class="col-md-6">
-
           <a href="#" class="logo glitch-effect" data-text="Fsociety TV">Fsociety TV</a>
-
           <span class="slogan d-none d-md-inline">hackeando la señal, liberando tu mente</span>
-
         </div>
-
         <div class="col-md-6 text-md-end">
-
           <span id="connectionStatus">
-
             <span class="status-indicator status-online"></span><span>Online</span>
-
           </span>
-
         </div>
-
       </div>
-
     </div>
-
   </header>
 
-
-
   <main class="main-container">
-
     <section class="player-section">
-
       <div class="player-container">
-
         <video id="iptv-player" class="video-js vjs-theme-fsociety" controls preload="auto">
-
           <p class="vjs-no-js">Para ver este video habilita JavaScript y actualiza tu navegador.</p>
-
         </video>
-
       </div>
-
     </section>
-
     <section class="channel-section">
-
       <div class="channel-search">
-
         <input type="text" id="channelSearch" placeholder="Buscar canal">
-
         <i class="fas fa-search"></i>
-
       </div>
-
       <div class="channel-list" id="channelList"></div>
-
     </section>
-
   </main>
 
-
-
   <footer class="footer">
-
     <div class="container">
-
       <div class="row">
-
         <div class="col-md-6"><p>Fsociety TV &copy; <span id="currentYear"></span></p></div>
-
         <div class="col-md-6 text-md-end">
-
           <button class="btn btn-sm btn-fsociety me-2" data-bs-toggle="modal" data-bs-target="#contactModal"><i class="fas fa-envelope me-1"></i>Contacto</button>
-
           <a href="https://paypal.me/fsociety" class="btn btn-sm btn-fsociety" target="_blank"><i class="fas fa-donate me-1"></i>Donaciones</a>
-
         </div>
-
       </div>
-
     </div>
-
   </footer>
 
-
-
   <div class="modal fade" id="contactModal" tabindex="-1">
-
     <div class="modal-dialog"><div class="modal-content">
-
       <div class="modal-header"><h5 class="modal-title">Contacto Fsociety</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-
       <div class="modal-body">
-
         <form id="contactForm">
-
           <div class="mb-3"><label class="form-label">Nombre</label><input type="text" class="form-control bg-dark text-light" required></div>
-
           <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control bg-dark text-light" required></div>
-
           <div class="mb-3"><label class="form-label">Mensaje</label><textarea class="form-control bg-dark text-light" rows="3" required></textarea></div>
-
         </form>
-
       </div>
-
       <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button><button form="contactForm" class="btn btn-fsociety">Enviar</button></div>
-
     </div></div>
-
   </div>
 
-
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
-
   <script>
-
     document.addEventListener('DOMContentLoaded', () => {
-
       document.getElementById('currentYear').textContent = new Date().getFullYear();
-
       initPlayer();
-
       loadChannels();
-
       simulateConnection();
-
-      initMatrixRain();  // Start MATRIX ESP animation
-
-      simulateLoading();  // Simulate loading process with status updates
-
+      initMatrixRain();
+      simulateLoading();
     });
 
-
-
     function initPlayer() {
-
       window.player = videojs('iptv-player', { fluid:true, responsive:true });
-
     }
 
-
-
     const channels = [
-
-  { 
-
-    id: 1, 
-
-    name: 'Willax', 
-
-    logo: 'https://fsociety.lat/images/willax.png', 
-
-    url: 'https://cdnback5.win.cdn.moderntv.eu:7909/win/stream/Willax_WIN/40-hls/live-media.m3u8?_cdn_attrs=account%3Dwin%2Cresource%3DWillax_WIN_stream_uf&_cdn_session=2042524614&_cdn_token=bfc0f1b7883e62d33e8c08aa348a70d28142aa06'
-
-  },
-
-  { 
-
-    id: 2, 
-
-    name: 'Latina', 
-
-    logo: 'https://fsociety.lat/images/latina.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ALatina_WIN&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=e90540ebf5b82aeeeba5df732cb4116abfa3de956eeab99f8b5c281a54acb711'
-
-  },
-
-  { 
-
-    id: 3, 
-
-    name: 'RPP', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/3/36/RPP_logo.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ARPP&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=3af4106bb30aae9873347ffcf0166d1276e54a9ea9eef531baeae05a283a5ae8'
-
-  },
-
-  { 
-
-    id: 4, 
-
-    name: 'America TV', 
-
-    logo: 'https://fsociety.lat/images/america.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AAmericaTV_WIN&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=53d212cb89ad11ce65eadaf5e7067753febb42ceee7207aab1ad3b718a7e71c0'
-
-  },
-
-  { 
-
-    id: 5, 
-
-    name: 'Panamericana TV', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Panamericana-tv.svg/1862px-Panamericana-tv.svg.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3APanamerica_WIN&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=b884d5f4f17fd1efe34df8f11dc465bec17dbae241f9c680ecec9e236eda1eb5'
-
-  },
-
-  { 
-
-    id: 6, 
-
-    name: 'ATV', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/ATV_logo_2020.png/1200px-ATV_logo_2020.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AATV_WIN&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=4e8e59a6d1504ff44b0f66c95d32e65d1725c124bfcf70be8b8e77aaf1267e6a'
-
-  },
-
-  { 
-
-    id: 7, 
-
-    name: 'ATV+', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/5/56/ATV%2B_logo_2020.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AATV_Noticias_WIN&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=d9fb06b73cfed187acf5de97e8837d981ec27b26ce3067aeddb7815cc6d36b27'
-
-  },
-
-  { 
-
-    id: 8, 
-
-    name: 'TV Peru', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Tv_Per%C3%BA_-_Logo_2019_Reducido_%28TVPE%29.svg/2560px-Tv_Per%C3%BA_-_Logo_2019_Reducido_%28TVPE%29.svg.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ATVPERU_WIN&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=5a457d6eba5587c2086f04628b8bb6b2130a64a59a3abf03d5d7cad621ed0c29'
-
-  },
-
-  { 
-
-    id: 9, 
-
-    name: 'L1 Max', 
-
-    logo: 'https://fsociety.lat/images/l1max.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AL1_MAX&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A2&lang=es&signature-expiration=1745905920&signature-hash=d37fe551d2a9e05443f44ea154204f663c9a639976197f1326c69ef4141e787f'
-
-  },
-
-  { 
-
-    id: 10, 
-
-    name: 'History Channel', 
-
-    logo: 'https://fsociety.lat/images/history channel.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AHistory_Channel&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=28eca4dd131d8120b645d541ad933dc7cc95e50c53629667eb4f04f718c20cad'
-
-  },
-
-  {
-  id: 11,
-  name: 'History Channel 2',
-  logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/History2Logo2019.png',
-  url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AHistory_Channel_2&content-expiration=1746284760&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746284760&signature-hash=808c84d8119f757710250f12a35cb3b9601ee1b1ffdb49df9a7b86a45010d2aa'
-  },
-
-  { 
-
-    id: 12, 
-
-    name: 'Comedy Central', 
-
-    logo: 'https://fsociety.lat/images/comedy central.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AComedy_Central&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=4b30d3eb1d317201120930c1cb8f9721a9a74fb5cddba7a63f1ddc02ff608fc4'
-
-  },
-
-  { 
-
-    id: 13, 
-
-    name: 'MTV', 
-
-    logo: 'https://fsociety.lat/images/mtv.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AMTV&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=66c985130d56d89af876aa2152e0e8803b962b33341c5ca36db35df3c22688f4'
-
-  },
-
-  { 
-
-    id: 14, 
-
-    name: 'Sony Channel', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Sony_Channel_Logo.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ASony_Channel&content-expiration=1746049860&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746049860&signature-hash=c1bf2f22caa4bcddcf679acfdfce0a72fe9fb5a54365e37e758a7950a145e47b'
-
-  },
-
-  { 
-
-    id: 15, 
-
-    name: 'Sony Movies', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Sony_Movies_Logo.svg/2042px-Sony_Movies_Logo.svg.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ASony_Movies&content-expiration=1746049860&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746049860&signature-hash=f33048730cab3a3e4d407acb6d6aea629b91d82450b2606717dad290fac73d5b'
-
-  },
-
-  { 
-
-    id: 16, 
-
-    name: 'AXN', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d0/AXN_Logo_2015.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AAXN&content-expiration=1746049860&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746049860&signature-hash=8948589f3f035b52ab28023cbd37d7bf4ef06be5869d4c814e413935b6555cbf'
-
-  },
-
-  { 
-
-    id: 17, 
-
-    name: 'A&E', 
-
-    logo: 'https://fsociety.lat/images/a&e.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AAyE&content-expiration=1746049860&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746049860&signature-hash=96a7d0d596a13125148394bb7cca8713ffd0dbe5c113b2bb336cce301c1c86c4'
-
-  },
-
-  { 
-
-    id: 18, 
-
-    name: 'Paramount', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Paramount_Network.svg', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AParamount&content-expiration=1746049860&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746049860&signature-hash=3c8b8f4ed9b8bfefb2c5d25dad332e34654db5e5dfd654909b3a9a548dbcadc7'
-
-  },
-
-  { 
-
-    id: 19, 
-
-    name: 'Universal Channel', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/d/dc/Universal_TV_Logo_2018.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AUniversal_Channel&content-expiration=1746049860&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746049860&signature-hash=df416e88db86b04688b592bfc76fc5a30cd1ffa9cf6b606654fbb536d19b3fef'
-
-  },
-
-  { 
-
-    id: 20, 
-
-    name: 'Studio Universal', 
-
-    logo: 'https://fsociety.lat/images/Studio Universal.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AStudio_Universal&content-expiration=1746049860&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746049860&signature-hash=5ad86c85453fdf2c0ded032ad5686e3b7a45d2fe923dfea78d47a321a5b4ab76'
-
-  },
-
-  { 
-
-    id: 21, 
-
-    name: 'E!', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/E%21_Logo.svg/1200px-E%21_Logo.svg.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AE&content-expiration=1745905920&user-id=91900482&device-id=1591600676&device-type=web&signature-ip=200.123.229.209&stream-quality=40&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1745905920&signature-hash=c6140a9f94f12df81c53f23e63506c493ac9006aba25023cc8edcda605755ff6'
-
-  },
-
-  { 
-
-    id: 22, 
-
-    name: 'Nickelodeon', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/c/c0/Nickelodeon.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ANick&content-expiration=1746309900&user-id=91900482&device-id=738000543&device-type=web&signature-ip=190.116.58.58&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746309900&signature-hash=83b88e82f4d0c2195709d5f6903dfe4a95799034c1e72e57e7acaa27daa6e155'
-
-  },
-
-  { 
-
-    id: 23, 
-
-    name: 'Nick Jr', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Nick_Jr.logo.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ANick_jr&content-expiration=1746309900&user-id=91900482&device-id=738000543&device-type=web&signature-ip=190.116.58.58&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746309900&signature-hash=68e57924ad884ee5bcd517c824dfd00a11d6d8170cb87a6cf4e00c003a8246ed'
-
-  },
-
-  { 
-
-    id: 24, 
-
-    name: 'Teen Nick', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d7/TeenNick_Logo_2017.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ATenn_nick&content-expiration=1746309900&user-id=91900482&device-id=738000543&device-type=web&signature-ip=190.116.58.58&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746309900&signature-hash=3d50c8691fa1f2e2d2f924a1d5172f6c62eedf4bc05316bf1aee20f5100b16fe'
-
-  },
-
-  { 
-
-    id: 25, 
-
-    name: 'Dreamworks', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/ff/DreamWorks_Animation_SKG_logo_with_fishing_boy.svg/1200px-DreamWorks_Animation_SKG_logo_with_fishing_boy.svg.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ADreamworks&content-expiration=1746309900&user-id=91900482&device-id=738000543&device-type=web&signature-ip=190.116.58.58&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746309900&signature-hash=02930f52d16f9d5dff1f984ce85a601157a019ae4e7217671f1ae264437e5ebb'
-
-  },
-
-  { 
-
-    id: 26, 
-
-    name: 'Lifetime', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Logo_Lifetime_2020.svg/2560px-Logo_Lifetime_2020.svg.png', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3ALife_Time&content-expiration=1746309900&user-id=91900482&device-id=738000543&device-type=web&signature-ip=190.116.58.58&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746309900&signature-hash=dcc364233c8a5563314a9e4f53c1f80772aa41b2a761c6efad8d894060e86a5f'
-
-  },
-
-  { 
-
-    id: 27, 
-
-    name: 'USA', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d7/USA_Network_logo_%282016%29.svg', 
-
-    url: 'https://stream.srv.win.moderntv.eu/stream.m3u8?content-id=channel%3AUSA&content-expiration=1746309900&user-id=91900482&device-id=738000543&device-type=web&signature-ip=190.116.58.58&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=4&parallel-group=ps%3A1&lang=es&signature-expiration=1746309900&signature-hash=edf126966f737127876ee8112366dc3dd207bfab6a6a66bc236051f3d3d53840'
-
-  },
-
-  { 
-
-    id: 28, 
-
-    name: 'Star Channel', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Star_Channel_2020.svg', 
-
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AFOXCHANNEL&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=92147b5b74c1ca470392755525e000bff21ec954421fbf31b9f29c52b8a6469b'
-
-  },
-
-  { 
-
-    id: 29, 
-
-    name: 'Cinecanal', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e6/CinecanalLA.png', 
-
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3ACINECANAL&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=a881a280f550e4a1b3d36c9cba19c30cd4d6a539217c858daf461ba2e7fc522e'
-
-  },
-
-  { 
-
-    id: 30, 
-
-    name: 'FX', 
-
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/FX_International_logo.svg', 
-
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AFX&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=49210edd968484a8314cf9ecc8084749cb56b26c26f823e86275494bd7c2ca7b'
-
-  },
-
-  { 
-    id: 31, 
-    name: 'ESPN 1', 
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/6/60/ESPN_logos.png', 
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AESPN&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=9f67510d159a79bf572b7b597075e78bba25e1531358ce33a7439a0866954596' 
-  },
-
-  { 
-    id: 32, 
-    name: 'ESPN 2', 
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/ESPN2_logo.svg/512px-ESPN2_logo.svg.png', 
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AESPN2&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=4ba228876b46e87c0b2aab2c717946a74969b1f368ae1c51feb4361e2c90eff6' 
-  },
-
-  { 
-    id: 33, 
-    name: 'ESPN 3', 
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/ESPN3_Logo.png', 
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AESPN3&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=4ed084a0fbd64b127f863365031794d852aff0467ba9600ad9c4a191c6d16c29' 
-  },
-
-  { 
-    id: 34, 
-    name: 'ESPN 4', 
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/ESPN_4_logo.svg/2560px-ESPN_4_logo.svg.png', 
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AESPN4&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=697a427a5c9f853799ee8c7122580c42107e72fd7c6c406d1681130e0563bfcb' 
-  },
-
-  { 
-    id: 35, 
-    name: 'ESPN 5', 
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/ESPN_5_logo.svg/1200px-ESPN_5_logo.svg.png', 
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AESPN5&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=cd68fea7a1ba575cc759071f676fc3417519734f2e5f047adbe821bb1945872e' 
-  },
-
-  { 
-    id: 36, 
-    name: 'ESPN 6', 
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/ESPN_6_logo.svg/1024px-ESPN_6_logo.svg.png', 
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AESPN6&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=c06ae9b6eb3d3c53fdf6147a4d8d6ab550beed896f7737cf2108fc43508ada5b' 
-  },
-
-  { 
-    id: 37, 
-    name: 'ESPN 7', 
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/ESPN_7_logo.svg/1200px-ESPN_7_logo.svg.png', 
-    url: 'https://stream.srv.econocable.i.mtvreg.com/stream.m3u8?content-id=channel%3AESPN7&content-expiration=1746591540&user-id=1328545625&device-id=1163386143&device-type=web&signature-ip=200.123.230.1&stream-quality=20&stream-format=m3u8&player-capabilities=adaptive2%2Cwebvtt%2Cvast%2Cclientvast&drm-system=&ott=0&parallel-limit=2&parallel-group=ps%3A1&lang=es&signature-expiration=1746591540&signature-hash=b322201b996bdc57d1c47463043a1da43224fa21d9575f47b0ce8fadf7c6556d' 
-  },
-
-];
-
-
-
-
+      { 
+        id: 1, 
+        name: 'L1 MAX', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/L1MAX-LOGO.svg/2560px-L1MAX-LOGO.svg.png', 
+        url: 'https://cdnback5.win.cdn.moderntv.eu:7909/win/stream/Liga_1_max/40-hls/live-media.m3u8?_cdn_attrs=account%3Dwin%2Cresource%3DLiga_1_max_stream_vh&_cdn_session=1919674677&_cdn_token=72c369807d9fcbc9bbf00fe046bb695c20a6ef5d',
+        isIframe: false
+      },
+      { 
+        id: 2, 
+        name: 'ESPN', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/6/60/ESPN_logos.png', 
+        url: 'http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn-mux/playlist.m3u8',
+        isIframe: false
+      },
+
+      { 
+        id: 2, 
+        name: 'ESPN 2', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/ESPN2_logo.svg/1280px-ESPN2_logo.svg.png', 
+        url: 'http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn2-mux/playlist.m3u8',
+        isIframe: false
+      },
+
+      { 
+        id: 2, 
+        name: 'ESPN 3', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/ESPN3_Logo.png', 
+        url: 'http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn3-mux/playlist.m3u8',
+        isIframe: false
+      },
+
+      { 
+        id: 2, 
+        name: 'ESPN 4', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/ESPN_4_logo.svg/1200px-ESPN_4_logo.svg.png', 
+        url: 'http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn4-mux/playlist.m3u8',
+        isIframe: false
+      },
+
+      { 
+        id: 2, 
+        name: 'ESPN 5', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/ESPN_5_logo.svg/2560px-ESPN_5_logo.svg.png', 
+        url: 'http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn5-mux/playlist.m3u8',
+        isIframe: false
+      },
+
+      { 
+        id: 2, 
+        name: 'ESPN 6', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/ESPN_6_logo.svg/1200px-ESPN_6_logo.svg.png', 
+        url: 'http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn6-mux/playlist.m3u8',
+        isIframe: false
+      },
+
+      { 
+        id: 2, 
+        name: 'ESPN 7', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/ESPN_7_logo.svg/2560px-ESPN_7_logo.svg.png', 
+        url: 'http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn7-mux/playlist.m3u8',
+        isIframe: false
+      },
+
+      { 
+        id: 8, 
+        name: 'GolPeru', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/LOGO_oficial.jpg', 
+        url: 'https://skyplustvhd.com/sky2.php?stream=golperu',
+        isIframe: true
+      },
+  
+      { 
+        id: 9, 
+        name: 'DSports', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/DSports.png', 
+        url: 'https://streamtpglobal.com/global2.php?stream=dsports',
+        isIframe: true
+      },
+
+      { 
+        id: 10, 
+        name: 'DSports 2', 
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/8/83/DSports2.png', 
+        url: 'https://streamtpglobal.com/global2.php?stream=dsports2',
+        isIframe: true
+      },
+
+      { 
+        id: 11, 
+        name: 'DSports+', 
+        logo: 'https://static.wikia.nocookie.net/logopedia/images/3/35/DirecTV_Sports%2B_2018.png/revision/latest?cb=20200706230244&path-prefix=es', 
+        url: 'https://streamtpglobal.com/global2.php?stream=dsportsplus',
+        isIframe: true
+      },
+
+    ];
 
     function loadChannels() {
-
       const list = document.getElementById('channelList');
-
       channels.forEach((ch,i) => {
-
         const div = document.createElement('div');
-
         div.className = 'channel-item';
-
         div.innerHTML = `<img src="${ch.logo}" class="channel-logo"><div class="channel-name">${ch.name}</div>`;
-
         div.onclick = () => playChannel(ch, div);
-
         list.appendChild(div);
-
       });
 
       document.getElementById('channelSearch').oninput = e => {
-
         const term = e.target.value.toLowerCase();
-
         document.querySelectorAll('.channel-item').forEach((ci, i) => {
-
           ci.style.display = channels[i].name.toLowerCase().includes(term)?'grid':'none';
-
         });
-
       };
-
     }
-
-
 
     function playChannel(ch, el) {
+  document.querySelectorAll('.channel-item').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
 
-      document.querySelectorAll('.channel-item').forEach(x=>x.classList.remove('active'));
+  const playerContainer = document.querySelector('.player-container');
+  playerContainer.innerHTML = ''; // Limpiar contenedor
 
-      el.classList.add('active');
+  if (ch.isIframe) {
+    playerContainer.innerHTML = `
+      <iframe 
+        src="${ch.url}" 
+        frameborder="0" 
+        allowfullscreen
+        style="width:100%; height:100%; position:absolute; top:0; left:0;"
+      ></iframe>
+    `;
+  } else {
+    playerContainer.innerHTML = `
+      <video 
+        id="iptv-player" 
+        class="video-js vjs-theme-fsociety" 
+        controls 
+        preload="auto"
+        playsinline
+      >
+        <p class="vjs-no-js">
+          Para ver este video habilita JavaScript y actualiza tu navegador.
+        </p>
+      </video>
+    `;
 
-      player.src({ src: ch.url, type: 'application/x-mpegURL' });
-
-      player.play();
-
+    // Destruir reproductor anterior
+    if (window.player) {
+      window.player.dispose();
     }
 
-
-
-    function simulateConnection() {
-
-      const cs = document.getElementById('connectionStatus');
-
-      setInterval(() => {
-
-        const dot = cs.querySelector('.status-indicator');
-
-        const txt = cs.querySelector('span:last-child');
-
-        if (Math.random()>0.9) {
-
-          dot.className='status-indicator status-offline'; txt.textContent='Offline';
-
-        } else {
-
-          dot.className='status-indicator status-online'; txt.textContent='Online';
-
-        }
-
-      }, 8000);
-
-    }
-
-
-
-    document.getElementById('contactForm').addEventListener('submit', e => {
-
-      e.preventDefault();
-
-      alert('Mensaje enviado (simulado). ¡Gracias!');
-
-      bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
-
-      e.target.reset();
-
+    // Inicializar nuevo reproductor con soporte HLS
+    window.player = videojs('iptv-player', {
+      fluid: true,
+      responsive: true,
+      html5: {
+        hls: {
+          overrideNative: true // Usar HLS.js incluso en navegadores con soporte nativo
+        },
+        nativeAudioTracks: false,
+        nativeVideoTracks: false
+      }
     });
 
+    player.src({
+      src: ch.url,
+      type: 'application/x-mpegURL'
+    });
 
+    player.ready(() => {
+      player.play().catch(e => {
+        console.error("Error al reproducir:", e);
+        // Mostrar mensaje al usuario si falla
+        player.errorDisplay.show("Error al cargar el stream. Intenta recargar la página.");
+      });
+    });
+  }
+}
+
+    function simulateConnection() {
+      const cs = document.getElementById('connectionStatus');
+      setInterval(() => {
+        const dot = cs.querySelector('.status-indicator');
+        const txt = cs.querySelector('span:last-child');
+        if (Math.random()>0.9) {
+          dot.className='status-indicator status-offline'; txt.textContent='Offline';
+        } else {
+          dot.className='status-indicator status-online'; txt.textContent='Online';
+        }
+      }, 8000);
+    }
+
+    document.getElementById('contactForm').addEventListener('submit', e => {
+      e.preventDefault();
+      alert('Mensaje enviado (simulado). ¡Gracias!');
+      bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+      e.target.reset();
+    });
 
     // MATRIX ESP Animation
-
     function initMatrixRain() {
-
       const canvas = document.getElementById('matrixRain');
-
       const ctx = canvas.getContext('2d');
 
-
-
       canvas.width = window.innerWidth;
-
       canvas.height = window.innerHeight;
 
-
-
       const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-
       const fontSize = 16;
-
       const columns = canvas.width / fontSize;
-
-
 
       const rainDrops = [];
 
-
-
       for (let x = 0; x < columns; x++) {
-
         rainDrops[x] = 1;
-
       }
 
-
-
       const draw = () => {
-
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-
-
         ctx.fillStyle = '#00ff41';
-
         ctx.font = fontSize + 'px monospace';
 
-
-
         for (let i = 0; i < rainDrops.length; i++) {
-
           const text = katakana.charAt(Math.floor(Math.random() * katakana.length));
-
           ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
 
-
-
           if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-
             rainDrops[i] = 0;
-
           }
-
           rainDrops[i]++;
-
         }
-
       };
-
-
 
       const interval = setInterval(draw, 50);
 
-
-
       window.addEventListener('resize', () => {
-
         canvas.width = window.innerWidth;
-
         canvas.height = window.innerHeight;
-
       });
-
     }
-
-
-
-    // Simulate loading process with status updates
 
     function simulateLoading() {
-
       const statusMessages = [
-
         "Cargando recursos...",
-
         "Inicializando reproductor...",
-
         "Conectando a servidores...",
-
         "Cargando lista de canales...",
-
         "Precargando streams...",
-
         "Listo!"
-
       ];
 
-
-
       const loadingStatus = document.querySelector('.loading-text');
-
       let currentStatus = 0;
 
-
-
       const statusInterval = setInterval(() => {
-
         loadingStatus.textContent = statusMessages[currentStatus];
-
         currentStatus++;
 
-
-
         if (currentStatus >= statusMessages.length) {
-
           clearInterval(statusInterval);
-
-
-
-          // Hide loading screen after a short delay
-
           setTimeout(() => {
-
             document.querySelector('.loading-screen').style.opacity = '0';
-
             setTimeout(() => {
-
               document.querySelector('.loading-screen').style.display = 'none';
-
             }, 500);
-
           }, 500);
-
         }
-
       }, 800);
-
     }
-
   </script>
-
 </body>
-
 </html>
-
