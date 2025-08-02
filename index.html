@@ -401,17 +401,15 @@
 
     // Inicializar nuevo reproductor con soporte HLS
     window.player = videojs('iptv-player', {
-      fluid: true,
-      responsive: true,
-      html5: {
-        hls: {
-          overrideNative: true // Usar HLS.js incluso en navegadores con soporte nativo
-        },
-        nativeAudioTracks: false,
-        nativeVideoTracks: false
-      }
-    });
-
+  fluid: true,
+  responsive: true,
+  html5: {
+    hls: {
+      overrideNative: true, // Usa HLS.js incluso en navegadores con soporte nativo
+      enableLowInitialPlaylist: true, // Ayuda con playlists grandes
+    },
+  },
+});
     player.src({
       src: ch.url,
       type: 'application/x-mpegURL'
