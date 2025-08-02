@@ -368,32 +368,34 @@
   el.classList.add('active');
 
   const playerContainer = document.querySelector('.player-container');
-  playerContainer.innerHTML = ''; // Limpiar contenedor
+  playerContainer.innerHTML = '<video id="iptv-player" class="video-js vjs-theme-fsociety" controls preload="auto"></video>';
 
-  if (ch.isIframe) {
-    playerContainer.innerHTML = `
-      <iframe 
-        src="${ch.url}" 
-        frameborder="0" 
-        allowfullscreen
-        style="width:100%; height:100%; position:absolute; top:0; left:0;"
-      ></iframe>
-    `;
-  } else {
-    playerContainer.innerHTML = `
-      <video 
-        id="iptv-player" 
-        class="video-js vjs-theme-fsociety" 
-        controls 
-        preload="auto"
-        playsinline
-      >
-        <p class="vjs-no-js">
-          Para ver este video habilita JavaScript y actualiza tu navegador.
-        </p>
-      </video>
-    `;
+  // Destruir el reproductor anterior si existe
+  if (window.player) {
+    window.player.dispose();
+  }
 
+  // Inicializar Video.js con configuración HLS mejorada
+  window.player = videojs('iptv-player', {
+    fluid: true,
+    responsive: true,
+    html5: {
+      hls: {
+        overrideNative: true,
+        enableLowInitialPlaylist: true,
+      },
+    },
+  });
+
+  // Intentar cargar el stream con manejo de errores
+  player.src({ src: ch.url, type: 'application/x-mpegURL' });
+  player.ready(() => {
+    player.play().catch(e => {
+      console.error("Error al reproducir:", e);
+      player.errorDisplay.show("Error al cargar el stream. Intenta recargar o usa otro canal.");
+    });
+  });
+},
     // Destruir reproductor anterior
     if (window.player) {
       window.player.dispose();
