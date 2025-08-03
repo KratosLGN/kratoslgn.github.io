@@ -1,5 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fsociety TV | Hackeando la señal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0c0c0c;
+            --accent-green: #00ff41;
+            --accent-dark: #0a0a0a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --glitch-effect: 2px 0 0 var(--accent-green), -2px 0 0 #ff00ff;
+        }
 
-⇝                { id: 5, name: "ESPN 4", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/ESPN_4_logo.svg/1200px-ESPN_4_logo.svg.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn4-mux/playlist.m3u8" },
+        /* Estilos base */
+        body {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
+        /* Scanlines overlay effect */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
 
-                { id: 5, name: "ESPN 4", logo: "https://upload.wikimedia.org/wikipedia                    /commons/thumb/7/78/ESPN_4_logo.svg/1200px-ESPN_4_logo.svg.png",                     url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn4-mux                    /playlist.m3u8" },                { id: 6, name: "ESPN 5", logo: "https://upload.wikimedia.org/wikipedia                    /commons/thumb/c/c7/ESPN_5_logo.svg/2560px-ESPN_5_logo.svg.png",                     url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn5-mux                    /playlist.m3u8" },                { id: 7, name: "ESPN 6", logo: "https://upload.wikimedia.org/wikipedia                    /commons/thumb/3/33/ESPN_6_logo.svg/1200px-ESPN_6_logo.svg.png",                     url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn6-mux                    /playlist.m3u8" },                { id: 8, name: "ESPN 7", logo: "https://upload.wikimedia.org/wikipedia                    /commons/thumb/7/7f/ESPN_7_logo.svg/2560px-ESPN_7_logo.svg.png",                     url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn7-mux                    /playlist.m3u8" },                { id: 9, name: "Blockchain TV", logo: "https://via.placeholder.com                    /60x60/0c0c0c/00ff41?text=BT", url: "https://example.com/stream9                    .m3u8" },                { id: 10, name: "Retro Gaming", logo: "https://via.placeholder.com                    /60x60/0c0c0c/00ff41?text=RG", url: "https://example.com/stream10                    .m3u8" },                { id: 11, name: "Sci-Fi Channel", logo: "https://via.placeholder.com                    /60x60/0c0c0c/00ff41?text=SF", url: "https://example.com/stream11                    .m3u8" },            ];                        // Render channels grid            renderChannelsGrid(channels);                        // Handle channel selection            document.getElementById('channelsGrid').addEventListener('click', function                (e) {
+        /* Header styles */
+        .header {
+            border-bottom: 1px solid var(--accent-green);
+            padding: 1rem 0;
+            background-color: rgba(12, 12, 12, 0.9);
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            color: var(--accent-green);
+            font-weight: bold;
+            font-size: 1.8rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+                .slogan {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* Main content layout */
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+        }
+
+        /* Horizontal layout (desktop) */
+        .player-container {
+            flex: 0 0 60%;
+            max-width: 60%;
+            height: 100%;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .channels-container {
+            flex: 0 0 40%;
+            max-width: 40%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: var(--accent-dark);
+            border-left: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        /* Vertical layout (mobile) */
+        @media (max-width: 992px) {
+            .player-container,
+            .channels-container {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .player-container {
+                height: 60vh;
+            }
+
+            .channels-container {
+                height: 40vh;
+                border-left: none;
+                border-top: 1px solid rgba(0, 255, 65, 0.2);
+            }
+        }
+
+        /* Video player styles */
+        .video-js {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border: 1px solid var(--accent-green);
+        }
+
+        .vjs-theme-fsociety {
+            --vjs-theme-fsociety--primary: var(--accent-green);
+            --vjs-theme-fsociety--secondary: #fff;
+        }
+
+        .vjs-theme-fsociety .vjs-big-play-button {
+            background-color: rgba(0, 255, 65, 0.7);
+            border: none;
+            border-radius: 50%;
+            width: 2.5em;
+            height: 2.5em;
+            line-height: 2.5em;
+            margin-left: -1.25em;
+            margin-top: -1.25em;
+        }
+
+        .vjs-theme-fsociety:hover .vjs-big-play-button {
+            background-color: rgba(0, 255, 65, 0.9);
+        }
+
+        /* Channels grid */
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            padding: 0.5rem;
+        }
+
+        .channel-item {
+            background-color: rgba(20, 20, 20, 0.7);
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            border-radius: 4px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .channel-item:hover {
+            border-color: var(--accent-green);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .channel-item.active {
+            background-color: rgba(0, 255, 65, 0.1);
+            border-color: var(--accent-green);
+        }
+
+        .channel-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 255, 65, 0.1),
+                transparent
+            );
+            transition: all 0.5s ease;
+        }
+
+        .channel-item:hover::before {
+            left: 100%;
+        }
+
+        .channel-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 0.5rem;
+            filter: grayscale(30%);
+            transition: filter 0.3s ease;
+        }
+
+        .channel-item:hover .channel-logo {
+            filter: grayscale(0%) brightness(1.2);
+        }
+
+        .channel-name {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s ease;
+        }
+
+        .channel-item:hover .channel-name {
+            color: var(--accent-green);
+        }
+
+        /* Glitch effect on hover */
+        .glitch-effect {
+            position: relative;
+        }
+
+        .glitch-effect:hover {
+            animation: glitch 0.5s linear infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: var(--glitch-effect);
+            }
+            25% {
+                text-shadow: -2px 0 0 var(--accent-green), 2px 0 0 #ff00ff;
+            }
+            50% {
+                text-shadow: 2px 0.5px 0 var(--accent-green), -2px -0.5px 0 #ff00ff;
+            }
+            75% {
+                text-shadow: -1px -0.25px 0 var(--accent-green), 1px 0.25px 0 #ff00ff;
+            }
+            100% {
+                text-shadow: var(--glitch-effect);
+            }
+        }
+
+        /* Search box */
+        .search-box {
+            position: sticky;
+            top: 0;
+            background-color: var(--accent-dark);
+            padding: 1rem 0;
+            z-index: 10;
+        }
+
+        .search-input {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--accent-green);
+            color: var(--text-primary);
+            font-family: 'Consolas', monospace;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            border-radius: 4px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Footer styles */
+        .footer {
+            border-top: 1px solid var(--accent-green);
+            padding: 1rem 0;
+            background-color: rgba(12, 12, 12, 0.9);
+            font-size: 0.8rem;
+        }
+
+        .connection-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .connection-status.online {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 5px var(--accent-green);
+        }
+
+        .connection-status.offline {
+            background-color: #ff3333;
+        }
+
+        /* Modal styles */
+        .modal-content {
+            background-color: var(--accent-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--accent-green);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--accent-green);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--accent-green);
+        }
+
+        .btn-fsociety {
+            background-color: transparent;
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            transition: all 0.3s ease;
+        }
+
+        .btn-fsociety:hover {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .loading-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+
+        .loading-text {
+            color: var(--accent-green);
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 1.4rem;
+            }
+            
+            .logo::after {
+                font-size: 0.8rem;
+            }
+            
+            .slogan {
+                font-size: 0.8rem;
+            }
+            
+            .channels-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <canvas id="matrixRain" class="matrix-rain"></canvas>
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <i class="fas fa-circle-notch fa-spin fa-3x"></i>
+            </div>
+            <div class="loading-text">Iniciando Fsociety TV...</div>
+            <div class="text-muted mt-2" id="loadingStatus">Cargando recursos...</div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <a href="#" class="logo glitch-effect">Fsociety TV</a>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="slogan">hackeando la señal, liberando tu mente</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Video Player -->
+        <div class="player-container">
+            <video id="iptvPlayer" class="video-js vjs-theme-fsociety" controls preload="auto" playsinline>
+                <p class="vjs-no-js">
+                    Para ver este video por favor habilita JavaScript o considera actualizar a un navegador que
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">soporte video HTML5</a>
+                </p>
+            </video>
+        </div>
+
+        <!-- Channels List -->
+        <div class="channels-container">
+            <div class="search-box">
+                <div class="container">
+                    <input type="text" id="channelSearch" class="search-input" placeholder="Buscar canal...">
+                </div>
+            </div>
+            <div class="container">
+                <div class="channels-grid" id="channelsGrid">
+                    <!-- Channels will be loaded here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <span id="connectionStatus">
+                        <span class="connection-status online"></span>
+                        <span>Conectado</span>
+                    </span>
+                </div>
+                <div class="col-md-4 text-center">
+                    <button class="btn btn-sm btn-fsociety" data-bs-toggle="modal" data-bs-target="#contactModal">
+                        <i class="fas fa-terminal me-1"></i> Contacto
+                    </button>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="https://www.paypal.com/donate" target="_blank" class="btn btn-sm btn-fsociety">
+                        <i class="fas fa-coins me-1"></i> Donaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contact Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Contacto Fsociety</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="contactName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control bg-dark text-light" id="contactName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control bg-dark text-light" id="contactEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactMessage" class="form-label">Mensaje</label>
+                            <textarea class="form-control bg-dark text-light" id="contactMessage" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" form="contactForm" class="btn btn-fsociety">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Bootstrap 5.3 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Video.js -->
+    <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
+    <!-- Custom Script -->
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate loading process
+            simulateLoading();
+            
+            // Initialize the application
+            initApp();
+        });
+
+        // Simulate loading process with status updates
+        function simulateLoading() {
+            const statusMessages = [
+                "Cargando recursos...",
+                "Inicializando reproductor...",
+                "Conectando a servidores...",
+                "Cargando lista de canales...",
+                "Precargando streams...",
+                "Listo!"
+            ];
+            
+            const loadingStatus = document.getElementById('loadingStatus');
+            let currentStatus = 0;
+            
+            const statusInterval = setInterval(() => {
+                loadingStatus.textContent = statusMessages[currentStatus];
+                currentStatus++;
+                
+                if (currentStatus >= statusMessages.length) {
+                    clearInterval(statusInterval);
+                    // Hide loading screen after a short delay
+                    setTimeout(() => {
+                        document.querySelector('.loading-screen').style.opacity = '0';
+                        setTimeout(() => {
+                            document.querySelector('.loading-screen').style.display = 'none';
+                        }, 500);
+                    }, 500);
+                }
+            }, 800);
+        }
+
+        // Matrix rain effect for loading screen
+        function initMatrixRain() {
+            const canvas = document.getElementById('matrixRain');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas to full window
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Matrix characters
+            const matrixChars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+            
+            // Calculate columns based on font size
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            
+            // Create drops for each column
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * -canvas.height / fontSize);
+            }
+            
+            // Draw function
+            function draw() {
+                // Semi-transparent black background
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Set font and color
+                ctx.fillStyle = '#00ff41';
+                ctx.font = `${fontSize}px monospace`;
+                
+                // Draw characters
+                for (let i = 0; i < drops.length; i++) {
+                    const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    // Reset drop if it reaches bottom or randomly
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    drops[i]++;
+                }
+            }
+            
+            // Animation loop
+            const matrixInterval = setInterval(draw, 50);
+            
+            // Cleanup on resize
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+            
+            // Return cleanup function
+            return function() {
+                clearInterval(matrixInterval);
+            };
+        }
+
+        // Initialize the main application
+        function initApp() {
+            // Start matrix rain effect
+            const cleanupMatrix = initMatrixRain();
+            
+            // Initialize Video.js player
+            const player = videojs('iptvPlayer', {
+                controls: true,
+                autoplay: false,
+                preload: 'auto',
+                responsive: true,
+                fluid: true,
+                playbackRates: [0.5, 1, 1.5, 2],
+                controlBar: {
+                    children: [
+                        'playToggle',
+                        'volumePanel',
+                        'currentTimeDisplay',
+                        'timeDivider',
+                        'durationDisplay',
+                        'progressControl',
+                        'liveDisplay',
+                        'remainingTimeDisplay',
+                        'customControlSpacer',
+                        'playbackRateMenuButton',
+                        'chaptersButton',
+                        'descriptionsButton',
+                        'subsCapsButton',
+                        'audioTrackButton',
+                        'fullscreenToggle'
+                    ]
+                }
+            });
+            
+            // Customize player skin
+            player.addClass('vjs-theme-fsociety');
+            
+            // Handle fullscreen on orientation change
+            window.addEventListener('orientationchange', function() {
+                if (window.orientation === 90 || window.orientation === -90) {
+                    player.requestFullscreen();
+                }
+            });
+            
+            // Sample channel data (in a real app, this would come from an API)
+            const channels = [
+                { id: 1, name: "L1MAX", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/L1MAX-LOGO.svg/2560px-L1MAX-LOGO.svg.png", url: "https://cdnback5.win.cdn.moderntv.eu:7909/win/stream/Liga_1_max/40-hls/live-media.m3u8?_cdn_attrs=account%3Dwin%2Cresource%3DLiga_1_max_stream_vh&_cdn_session=1919674677&_cdn_token=72c369807d9fcbc9bbf00fe046bb695c20a6ef5d" },
+                { id: 2, name: "ESPN", logo: "https://upload.wikimedia.org/wikipedia/commons/6/60/ESPN_logos.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn-mux/playlist.m3u8" },
+                { id: 3, name: "ESPN 2", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/ESPN2_logo.svg/1280px-ESPN2_logo.svg.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn2-mux/playlist.m3u8" },
+                { id: 4, name: "ESPN 3", logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/ESPN3_Logo.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn3-mux/playlist.m3u8" },
+                { id: 5, name: "ESPN 4", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/ESPN_4_logo.svg/1200px-ESPN_4_logo.svg.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn4-mux/playlist.m3u8" },
+                { id: 6, name: "ESPN 5", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/ESPN_5_logo.svg/2560px-ESPN_5_logo.svg.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn5-mux/playlist.m3u8" },
+                { id: 7, name: "ESPN 6", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/ESPN_6_logo.svg/1200px-ESPN_6_logo.svg.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn6-mux/playlist.m3u8" },
+                { id: 8, name: "ESPN 7", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/ESPN_7_logo.svg/2560px-ESPN_7_logo.svg.png", url: "http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/espn7-mux/playlist.m3u8" },
+                { id: 9, name: "Blockchain TV", logo: "https://via.placeholder.com/60x60/0c0c0c/00ff41?text=BT", url: "https://example.com/stream9.m3u8" },
+                { id: 10, name: "Retro Gaming", logo: "https://via.placeholder.com/60x60/0c0c0c/00ff41?text=RG", url: "https://example.com/stream10.m3u8" },
+                { id: 11, name: "Sci-Fi Channel", logo: "https://via.placeholder.com/60x60/0c0c0c/00ff41?text=SF", url: "https://example.com/stream11.m3u8" },
+                { id: 12, name: "Underground", logo: "https://via.placeholder.com/60x60/0c0c0c/00ff41?text=UG", url: "https://example.com/stream12.m3u8" }
+            ];
+            
+            // Render channels grid
+            renderChannelsGrid(channels);
+            
+            // Handle channel selection
+            document.getElementById('channelsGrid').addEventListener('click', function(e) {
+                const channelItem = e.target.closest('.channel-item');
+                if (channelItem) {
+                    const channelId = parseInt(channelItem.dataset.channelId);
+                    const channel = channels.find(c => c.id === channelId);
+                    
+                    if (channel) {
+                        // Update active channel
+                        document.querySelectorAll('.channel-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                        channelItem.classList.add('active');
+                        
+                        // Change video source
+                        player.src({ src: channel.url, type: 'application/x-mpegURL' });
+                        player.poster(channel.logo);
+                        player.play();
+                        
+                        // Update player title
+                        document.querySelector('.vjs-title').textContent = channel.name;
+                    }
+                }
+            });
+            
+            // Handle channel search
+            document.getElementById('channelSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const channelItems = document.querySelectorAll('.channel-item');
+                
+                channelItems.forEach(item => {
+                    const channelName = item.dataset.channelName.toLowerCase();
+                    if (channelName.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Preload first 3 channels
+            preloadChannels(channels.slice(0, 3));
+            
+            // Handle contact form submission
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // In a real app, you would send the form data to a server
+                alert('Mensaje enviado (simulado). ¡Gracias por contactar con Fsociety!');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+                modal.hide();
+                this.reset();
+            });
+            
+            // Simulate connection status changes
+            simulateConnectionStatus();
+            
+            // Cleanup function
+            return function() {
+                cleanupMatrix();
+                if (player) player.dispose();
+            };
+        }
+        
+        // Render channels grid
+        function renderChannelsGrid(channels) {
+            const gridContainer = document.getElementById('channelsGrid');
+            gridContainer.innerHTML = '';
+            
+            channels.forEach(channel => {
+                const channelItem = document.createElement('div');
+                channelItem.className = 'channel-item';
+                channelItem.dataset.channelId = channel.id;
+                channelItem.dataset.channelName = channel.name;
+                
+                channelItem.innerHTML = `
+                    <img src="${channel.logo}" alt="${channel.name}" class="channel-logo">
+                    <div class="channel-name">${channel.name}</div>
+                `;
+                
+                gridContainer.appendChild(channelItem);
+            });
+        }
+        
+        // Preload channels for better performance
+        function preloadChannels(channels) {
+            channels.forEach(channel => {
+                const link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = channel.url;
+                link.as = 'fetch';
+                document.head.appendChild(link);
+                
+                // Also preload the logo images
+                const img = new Image();
+                img.src = channel.logo;
+            });
+        }
+        
+        // Simulate connection status changes
+        function simulateConnectionStatus() {
+            const statusElement = document.getElementById('connectionStatus');
+            const statusDot = statusElement.querySelector('.connection-status');
+            const statusText = statusElement.querySelector('span:last-child');
+            
+            setInterval(() => {
+                // Randomly change status (90% chance to stay online)
+                if (Math.random() > 0.9) {
+                    statusDot.classList.remove('online');
+                    statusDot.classList.add('offline');
+                    statusText.textContent = 'Desconectado';
+                } else {
+                    statusDot.classList.remove('offline');
+                    statusDot.classList.add('online');
+                    statusText.textContent = 'Conectado';
+                }
+            }, 10000);
+        }
+    </script>
+</body>
+</html>
