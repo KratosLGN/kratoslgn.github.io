@@ -397,11 +397,6 @@
       player.on('waiting', () => setStatus(false, 'Cargando...'));
       player.on('error', () => setStatus(false, 'Error'));
 
-      // Hint por Mixed Content típico
-      const hint = document.getElementById('playerHint');
-      hint.textContent = 'Tip: si un canal no reproduce en HTTPS, revisa que el stream sea HTTPS (mixed content).';
-    }
-
     const channels = [
       {
         id: 1,
