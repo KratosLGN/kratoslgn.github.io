@@ -266,6 +266,56 @@
         height:110px;
       }
     }
+    /* =========================
+   MODO MÓVIL: HEADER + PLAYER FIJOS
+   Y SOLO SCROLL EN CANALES
+   ========================= */
+@media (max-width: 768px) {
+
+  /* 1) Evita que el body haga scroll en móvil */
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* 2) El contenedor principal ocupa toda la pantalla */
+  .main-container {
+    height: calc(100vh - 86px); /* 86px aprox altura del header */
+    overflow: hidden;
+  }
+
+  /* 3) Player se queda fijo arriba (no se mueve) */
+  .player-section {
+    flex: 0 0 auto;
+    padding: .75rem;
+  }
+
+  /* 4) La zona de canales ocupa el resto y SÍ scrollea */
+  .channel-section {
+    flex: 1 1 auto;
+    overflow: hidden;
+    padding: .75rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 5) La lista es la que scrollea */
+  .channel-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* scroll suave en iPhone */
+    padding-bottom: 1rem;
+  }
+  /* ✅ Quitar scanlines encima del reproductor */
+.player-container {
+  position: relative;
+  z-index: 2;
+  }
+
+.scanlines {
+  z-index: 1; /* queda detrás del player */
+  }
+}
   </style>
 </head>
 
