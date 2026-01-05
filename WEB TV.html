@@ -221,8 +221,10 @@
 }
 
     .channel-search i { position:absolute; right:15px; top:10px; color:var(--accent-green); }
-
-    .channel-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:1rem; max-height:calc(100vh - 250px); overflow-y:auto; padding-right:.5rem; justify-items: center; }
+@media (max-width: 768px) {
+    .channel-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:1rem; max-height: none;     /* que NO fuerce altura */
+    overflow-y: visible;  /* sin scroll interno */
+    padding-right: 0; padding-right:.5rem; justify-items: center; }}
 
     .channel-item {
 
