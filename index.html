@@ -396,6 +396,7 @@
       player.on('playing', () => setStatus(true, 'Online'));
       player.on('waiting', () => setStatus(false, 'Cargando...'));
       player.on('error', () => setStatus(false, 'Error'));
+    }
 
     const channels = [
       {
