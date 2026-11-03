@@ -247,75 +247,74 @@
       box-shadow:0 0 10px var(--accent-green);
     }
 
-    /* ✅ MODO MÓVIL: botones pegados debajo del reproductor, sin buscador */
-    @media (max-width:768px){
-      .player-section{ padding:.75rem; }
-      .channel-section{ padding:.75rem; }
-
-      .channel-search{ display:none; } /* ocultar buscador en móvil */
-
-      .channel-list{
-        padding-right:0;
-        max-height:none;
-        overflow-y:visible;
-        grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
-      }
-
-      .channel-item{
-        width:110px;
-        height:110px;
-      }
+    /* Responsive touch layout */
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; background: radial-gradient(ellipse at top, #102019 0, #0c0c0c 55%); }
+    button, a, input { touch-action: manipulation; }
+    button, input { font: inherit; }
+    button, .btn { min-height: 48px; }
+    :focus-visible { outline: 3px solid var(--accent-green); outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .header { padding: 1rem max(1rem, env(safe-area-inset-left)); border-color: #24412e; }
+    #connectionStatus { display: inline-flex; align-items: center; font-size: .85rem; padding: .5rem .75rem; border-radius: 99px; background: #172019; }
+    .status-offline { background: #aab4ad; }
+    .status-error { background: #ff9b85; }
+    .main-container { max-width: 1440px; margin: auto; gap: .5rem; padding: 1rem; align-items: flex-start; }
+    .player-section { flex: 1 1 65%; min-width: 0; padding: .5rem; }
+    .player-container { padding-bottom: 0; aspect-ratio: 16 / 9; box-shadow: 0 16px 48px #0006; }
+    .player-welcome { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; padding: 1rem; text-align: center; background: radial-gradient(ellipse at center, #123621, #080e0b 70%); overflow: hidden; }
+    .welcome-symbol { display: grid; place-items: center; width: clamp(48px, 10vw, 80px); aspect-ratio: 1; border: 1px solid #00ff4166; border-radius: 50%; color: var(--accent-green); font-size: clamp(1.25rem, 4vw, 2rem); box-shadow: 0 0 35px #00ff4115; animation: welcome-glow 3s ease-in-out infinite; }
+    .player-welcome strong { color: var(--accent-green); font-size: clamp(1rem, 3vw, 1.5rem); letter-spacing: .08em; }
+    .player-welcome p { color: #c0cfc4; font-size: clamp(.7rem, 2vw, .9rem); margin: 0; }
+    @keyframes welcome-glow { 50% { box-shadow: 0 0 45px #00ff4135; border-color: var(--accent-green); } }
+    .player-container .video-js { width: 100%; height: 100%; padding-top: 0; }
+    .player-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
+    .eyebrow { color: var(--accent-green); font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; margin: 0 0 .3rem; }
+    #currentChannel { font-size: clamp(1.1rem, 3vw, 1.5rem); margin: 0; }
+    .player-feedback { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .75rem; min-height: 48px; }
+    #playerHint { margin: 0; color: var(--text-secondary); font-size: .85rem; }
+    .channel-section { flex: 1 1 35%; min-width: 260px; padding: 1rem; background: #101713; border: 1px solid #26392c; border-radius: 20px; }
+    .section-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+    .section-heading h2 { font-size: 1.1rem; margin: 0; }
+    #channelCount { color: var(--text-secondary); font-size: .75rem; }
+    .channel-search { display: flex; align-items: center; gap: .5rem; }
+    .channel-search input { min-height: 52px; padding: .75rem; min-width: 0; color: var(--text-primary); font-size: 16px; }
+    .clear-search { flex-shrink: 0; width: 48px; border: 1px solid #37533e; border-radius: 12px; color: var(--text-primary); background: #18241c; }
+    .channel-list { grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: .75rem; padding: 0; align-items: stretch; }
+    .channel-item { width: 100%; height: auto; min-height: 145px; flex-direction: column; gap: .75rem; border: 1px solid #344339; color: var(--text-primary); background: #171e19; animation: card-enter .45s ease both; transition: transform .18s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease; }
+    .channel-item:nth-child(2) { animation-delay: .08s; }
+    .channel-name { display: block; font-size: .9rem; font-weight: bold; }
+    .channel-logo { max-width: 100px; filter: none; }
+    .channel-item.active { border-color: var(--accent-green); box-shadow: 0 0 0 1px var(--accent-green), 0 6px 22px #00ff4112; }
+    .channel-item.active::after { content: '✓'; position: absolute; top: .4rem; right: .6rem; color: var(--accent-green); }
+    .channel-item:active, .btn:active, .clear-search:active { transform: scale(.96); }
+    .empty-state { color: var(--text-secondary); padding: 1rem 0; }
+    .footer { margin-top: 1rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+    .footer p { margin-bottom: .5rem; }
+    .footer > .container { padding-inline: 1rem; }
+    .btn-fsociety { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: 12px; padding: .6rem 1rem; }
+    .loading-screen { transition: opacity .5s ease; }
+    .vjs-theme-fsociety .vjs-control-bar { height: 48px; }
+    .vjs-theme-fsociety .vjs-button { min-width: 44px; height: 48px; }
+    .scanlines { z-index: 0; opacity: .18; }
+    main, footer { position: relative; z-index: 1; }
+    @keyframes card-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (hover: hover) and (pointer: fine) { .channel-item:hover { transform: translateY(-3px); border-color: #79b989; } }
+    @media (max-width: 1023px) { .main-container { flex-direction: column; } .player-section, .channel-section { width: 100%; min-width: 0; } }
+    @media (max-width: 600px) {
+      .main-container { padding: .5rem; gap: .5rem; }
+      .header { padding: .75rem; }
+      .logo { font-size: 1.5rem; }
+      .slogan { display: none; }
+      #connectionStatus { margin-top: .4rem; }
+      .channel-section { padding: .85rem; }
+      .channel-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .channel-item { min-height: 130px; }
     }
-    /* =========================
-   MODO MÓVIL: HEADER + PLAYER FIJOS
-   Y SOLO SCROLL EN CANALES
-   ========================= */
-@media (max-width: 768px) {
-
-  /* 1) Evita que el body haga scroll en móvil */
-  body {
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* 2) El contenedor principal ocupa toda la pantalla */
-  .main-container {
-    height: calc(100vh - 86px); /* 86px aprox altura del header */
-    overflow: hidden;
-  }
-
-  /* 3) Player se queda fijo arriba (no se mueve) */
-  .player-section {
-    flex: 0 0 auto;
-    padding: .75rem;
-  }
-
-  /* 4) La zona de canales ocupa el resto y SÍ scrollea */
-  .channel-section {
-    flex: 1 1 auto;
-    overflow: hidden;
-    padding: .75rem;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* 5) La lista es la que scrollea */
-  .channel-list {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* scroll suave en iPhone */
-    padding-bottom: 1rem;
-  }
-  /* ✅ Quitar scanlines encima del reproductor */
-.player-container {
-  position: relative;
-  z-index: 2;
-  }
-
-.scanlines {
-  z-index: 1; /* queda detrás del player */
-  }
-}
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .matrix-rain { display: none; }
+    }
   </style>
 </head>
 
@@ -339,8 +338,8 @@
           <span class="slogan d-none d-md-inline">hackeando la señal, liberando tu mente</span>
         </div>
         <div class="col-md-6 text-md-end">
-          <span id="connectionStatus">
-            <span class="status-indicator status-offline"></span><span>Conectando...</span>
+          <span id="connectionStatus" role="status" aria-live="polite">
+            <span class="status-indicator status-offline"></span><span>Selecciona un canal</span>
           </span>
         </div>
       </div>
@@ -348,23 +347,29 @@
   </header>
 
   <main class="main-container">
-    <section class="player-section">
+    <section class="player-section" aria-label="Reproductor">
+      <div class="player-heading"><div><p class="eyebrow">Tu señal, a un toque</p><h1 id="currentChannel">Elige qué ver</h1></div></div>
       <div class="player-container">
         <video id="iptv-player" class="video-js vjs-theme-fsociety" controls preload="auto" playsinline webkit-playsinline>
           <p class="vjs-no-js">Para ver este video habilita JavaScript y actualiza tu navegador.</p>
         </video>
+        <div id="playerWelcome" class="player-welcome">
+          <span class="welcome-symbol" aria-hidden="true">▶</span>
+          <strong>FSOCIETY TV</strong>
+          <p>Tu próxima señal te espera.<br>Selecciona un canal para comenzar.</p>
+        </div>
       </div>
-      <div class="mt-2 small" id="playerHint" style="color: var(--text-secondary)"></div>
+      <div class="player-feedback"><p id="playerHint" role="status">Toca un canal para empezar.</p><button type="button" id="retryChannel" class="btn btn-fsociety" hidden>Reintentar</button></div>
     </section>
 
     <section class="channel-section">
-      <!-- Buscador (se oculta en móvil por CSS) -->
+      <div class="section-heading"><h2>Canales</h2><span id="channelCount"></span></div>
       <div class="channel-search">
-        <input type="text" id="channelSearch" placeholder="Buscar canal" />
-        <i class="fas fa-search"></i>
+        <input type="search" id="channelSearch" placeholder="Buscar canal" aria-label="Buscar canal" autocomplete="off" />
+        <button type="button" id="clearSearch" class="clear-search" aria-label="Limpiar búsqueda" hidden>×</button>
       </div>
-
       <div class="channel-list" id="channelList"></div>
+      <p id="emptySearch" class="empty-state" role="status" hidden>No encontramos ese canal. Prueba con otro nombre.</p>
     </section>
   </main>
 
@@ -373,9 +378,6 @@
       <div class="row">
         <div class="col-md-6"><p>Fsociety TV &copy; <span id="currentYear"></span></p></div>
         <div class="col-md-6 text-md-end">
-          <button class="btn btn-sm btn-fsociety me-2" data-bs-toggle="modal" data-bs-target="#contactModal">
-            <i class="fas fa-envelope me-1"></i>Contacto
-          </button>
           <a href="https://paypal.me/fsociety" class="btn btn-sm btn-fsociety" target="_blank" rel="noopener">
             <i class="fas fa-donate me-1"></i>Donaciones
           </a>
@@ -384,39 +386,7 @@
     </div>
   </footer>
 
-  <div class="modal fade" id="contactModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Contacto Fsociety</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form id="contactForm">
-            <div class="mb-3">
-              <label class="form-label">Nombre</label>
-              <input type="text" class="form-control bg-dark text-light" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control bg-dark text-light" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Mensaje</label>
-              <textarea class="form-control bg-dark text-light" rows="3" required></textarea>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button form="contactForm" class="btn btn-fsociety">Enviar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- JS externos -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Reproductor -->
   <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
 
   <script>
@@ -427,25 +397,30 @@
       loadChannels();
       initMatrixRain();
       simulateLoading();
-      bindContactForm();
+      document.getElementById('retryChannel').addEventListener('click', () => { if (selectedChannel) playChannel(selectedChannel); });
     });
 
-    function initPlayer() {
-      window.player = videojs('iptv-player', { fluid: true, responsive: true });
+    let selectedChannel = null;
+    let playbackAttempt = 0;
 
-      // UX: estado real del player
+    function setPlayerStatus(state, label, hint) {
       const cs = document.getElementById('connectionStatus');
-      const dot = cs.querySelector('.status-indicator');
-      const txt = cs.querySelector('span:last-child');
+      cs.querySelector('.status-indicator').className = 'status-indicator status-' + state;
+      cs.querySelector('span:last-child').textContent = label;
+      document.getElementById('playerHint').textContent = hint;
+      document.getElementById('retryChannel').hidden = state !== 'error' || !selectedChannel;
+    }
 
-      function setStatus(isOnline, label){
-        dot.className = 'status-indicator ' + (isOnline ? 'status-online' : 'status-offline');
-        txt.textContent = label;
+    function initPlayer() {
+      if (typeof videojs !== 'function') {
+        setPlayerStatus('error', 'Reproductor no disponible', 'No se pudo cargar el reproductor. Revisa tu conexión y vuelve a intentarlo.');
+        return;
       }
-
-      player.on('playing', () => setStatus(true, 'Online'));
-      player.on('waiting', () => setStatus(false, 'Cargando...'));
-      player.on('error', () => setStatus(false, 'Error'));
+      window.player = videojs('iptv-player', { fluid: false, responsive: true });
+      player.on('playing', () => setPlayerStatus('online', 'En reproducción', 'Disfruta de ' + selectedChannel.name + '.'));
+      player.on('waiting', () => { if (selectedChannel) setPlayerStatus('offline', 'Cargando señal…', 'Estamos conectando con el canal.'); });
+      player.on('pause', () => { if (selectedChannel && !player.error()) setPlayerStatus('offline', 'En pausa', 'Pulsa reproducir para continuar.'); });
+      player.on('error', () => setPlayerStatus('error', 'Señal no disponible', 'No pudimos conectar. Reintenta o elige otro canal.'));
     }
 
     const channels = [
@@ -466,49 +441,55 @@
     function loadChannels() {
       const list = document.getElementById('channelList');
       list.innerHTML = '';
-
       channels.forEach((ch) => {
-        const div = document.createElement('div');
-        div.className = 'channel-item';
-        div.dataset.channelId = ch.id;
-
-        div.innerHTML = `
-          <img src="${ch.logo}" class="channel-logo" alt="${ch.name}">
-          <div class="channel-name">${ch.name}</div>
-        `;
-
-        div.addEventListener('click', () => playChannel(ch, div));
-        list.appendChild(div);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'channel-item';
+        button.dataset.channelId = ch.id;
+        button.setAttribute('aria-pressed', 'false');
+        button.innerHTML = `<img src="${ch.logo}" class="channel-logo" alt=""><span class="channel-name">${ch.name}</span>`;
+        button.querySelector('img').addEventListener('error', e => { e.target.hidden = true; });
+        button.addEventListener('click', () => playChannel(ch));
+        list.appendChild(button);
       });
-
-      // Buscador (solo visible en desktop, pero dejamos la lógica)
       const input = document.getElementById('channelSearch');
-      input.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase().trim();
-        document.querySelectorAll('.channel-item').forEach(ci => {
-          const ch = channels.find(x => String(x.id) === ci.dataset.channelId);
-          const match = ch && ch.name.toLowerCase().includes(term);
-          ci.style.display = match ? 'flex' : 'none'; // ✅ FIX: no usar 'grid'
+      const clear = document.getElementById('clearSearch');
+      function filterChannels() {
+        const term = input.value.toLocaleLowerCase('es').trim();
+        let count = 0;
+        list.querySelectorAll('.channel-item').forEach(button => {
+          const ch = channels.find(ch => String(ch.id) === button.dataset.channelId);
+          button.hidden = !ch.name.toLocaleLowerCase('es').includes(term);
+          if (!button.hidden) count++;
         });
+        document.getElementById('emptySearch').hidden = count > 0;
+        document.getElementById('channelCount').textContent = count + (count === 1 ? ' canal' : ' canales');
+        clear.hidden = !input.value;
+      }
+      input.addEventListener('input', filterChannels);
+      clear.addEventListener('click', () => { input.value = ''; filterChannels(); input.focus(); });
+      filterChannels();
+    }
+
+    function playChannel(ch) {
+      selectedChannel = ch;
+      document.getElementById('playerWelcome').hidden = true;
+      const attempt = ++playbackAttempt;
+      document.querySelectorAll('.channel-item').forEach(button => {
+        const active = button.dataset.channelId === String(ch.id);
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
       });
-    }
-
-    function playChannel(ch, el) {
-      document.querySelectorAll('.channel-item').forEach(x => x.classList.remove('active'));
-      el.classList.add('active');
-
+      document.getElementById('currentChannel').textContent = ch.name;
+      if (!window.player) initPlayer();
+      if (!window.player) return;
+      setPlayerStatus('offline', 'Cargando señal…', 'Conectando con ' + ch.name + '…');
       player.src({ src: ch.url, type: 'application/x-mpegURL' });
-      const p = player.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    }
-
-    function bindContactForm(){
-      const form = document.getElementById('contactForm');
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert('Mensaje enviado (simulado). ¡Gracias!');
-        bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
-        form.reset();
+      const promise = player.play();
+      if (promise && typeof promise.catch === 'function') promise.catch(error => {
+        if (attempt !== playbackAttempt || error.name === 'AbortError') return;
+        if (error.name === 'NotAllowedError') setPlayerStatus('offline', 'Pulsa reproducir', 'Toca el botón de reproducción para comenzar.');
+        else setPlayerStatus('error', 'Señal no disponible', 'No pudimos iniciar la señal. Reintenta o elige otro canal.');
       });
     }
 
@@ -516,6 +497,7 @@
     function initMatrixRain() {
       const canvas = document.getElementById('matrixRain');
       const ctx = canvas.getContext('2d');
+      if (!ctx || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       function resize(){
         canvas.width = window.innerWidth;
@@ -586,7 +568,7 @@
             }, 500);
           }, 400);
         }
-      }, 650);
+      }, 350);
     }
   </script>
 </body>
