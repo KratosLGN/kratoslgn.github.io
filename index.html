@@ -361,7 +361,7 @@
           <p>Tu próxima señal te espera.<br>Selecciona un canal para comenzar.</p>
         </div>
       </div>
-      <div class="player-feedback"><p id="playerHint" role="status">Toca un canal para empezar.</p><a id="openSignal" class="btn btn-fsociety" target="_blank" rel="noopener noreferrer" hidden>Abrir señal</a><button type="button" id="retryChannel" class="btn btn-fsociety" hidden>Reintentar</button></div>
+      <div class="player-feedback"><p id="playerHint" role="status">Toca un canal para empezar.</p><button type="button" id="retryChannel" class="btn btn-fsociety" hidden>Reintentar</button></div>
     </section>
 
     <section class="channel-section">
@@ -485,20 +485,17 @@
       });
       document.getElementById('currentChannel').textContent = ch.name;
       const frame = document.getElementById('embeddedPlayer');
-      const openSignal = document.getElementById('openSignal');
       frame.hidden = true;
       frame.removeAttribute('src');
-      openSignal.hidden = ch.type !== 'embed';
       if (ch.type === 'embed') {
         if (window.player) player.pause();
         frame.title = 'Reproductor externo de ' + ch.name;
         frame.src = ch.url;
         frame.hidden = false;
-        openSignal.href = ch.url;
-        setPlayerStatus('offline', 'Reproductor externo', 'Usa los controles de la señal. Si no aparece, pulsa Abrir señal.');
+        setPlayerStatus('offline', 'Reproductor externo', 'Usa los controles de la señal. Si aparece un error, puedes reintentar la carga.');
+        document.getElementById('retryChannel').hidden = false;
         return;
       }
-      openSignal.removeAttribute('href');
       if (!window.player) initPlayer();
       if (!window.player) return;
       setPlayerStatus('offline', 'Cargando señal…', 'Conectando con ' + ch.name + '…');
