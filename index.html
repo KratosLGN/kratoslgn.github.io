@@ -262,6 +262,7 @@
     .main-container { max-width: 1440px; margin: auto; gap: .5rem; padding: 1rem; align-items: flex-start; }
     .player-section { flex: 1 1 65%; min-width: 0; padding: .5rem; }
     .player-container { padding-bottom: 0; aspect-ratio: 16 / 9; box-shadow: 0 16px 48px #0006; }
+    .embedded-player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; z-index: 2; }
     .player-welcome { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; padding: 1rem; text-align: center; background: radial-gradient(ellipse at center, #123621, #080e0b 70%); overflow: hidden; }
     .welcome-symbol { display: grid; place-items: center; width: clamp(48px, 10vw, 80px); aspect-ratio: 1; border: 1px solid #00ff4166; border-radius: 50%; color: var(--accent-green); font-size: clamp(1.25rem, 4vw, 2rem); box-shadow: 0 0 35px #00ff4115; animation: welcome-glow 3s ease-in-out infinite; }
     .player-welcome strong { color: var(--accent-green); font-size: clamp(1rem, 3vw, 1.5rem); letter-spacing: .08em; }
@@ -353,13 +354,14 @@
         <video id="iptv-player" class="video-js vjs-theme-fsociety" controls preload="auto" playsinline webkit-playsinline>
           <p class="vjs-no-js">Para ver este video habilita JavaScript y actualiza tu navegador.</p>
         </video>
+        <iframe id="embeddedPlayer" class="embedded-player" title="Señal externa" allow="autoplay; fullscreen; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen hidden></iframe>
         <div id="playerWelcome" class="player-welcome">
           <span class="welcome-symbol" aria-hidden="true">▶</span>
           <strong>FSOCIETY TV</strong>
           <p>Tu próxima señal te espera.<br>Selecciona un canal para comenzar.</p>
         </div>
       </div>
-      <div class="player-feedback"><p id="playerHint" role="status">Toca un canal para empezar.</p><button type="button" id="retryChannel" class="btn btn-fsociety" hidden>Reintentar</button></div>
+      <div class="player-feedback"><p id="playerHint" role="status">Toca un canal para empezar.</p><a id="openSignal" class="btn btn-fsociety" target="_blank" rel="noopener noreferrer" hidden>Abrir señal</a><button type="button" id="retryChannel" class="btn btn-fsociety" hidden>Reintentar</button></div>
     </section>
 
     <section class="channel-section">
@@ -417,10 +419,10 @@
         return;
       }
       window.player = videojs('iptv-player', { fluid: false, responsive: true });
-      player.on('playing', () => setPlayerStatus('online', 'En reproducción', 'Disfruta de ' + selectedChannel.name + '.'));
-      player.on('waiting', () => { if (selectedChannel) setPlayerStatus('offline', 'Cargando señal…', 'Estamos conectando con el canal.'); });
-      player.on('pause', () => { if (selectedChannel && !player.error()) setPlayerStatus('offline', 'En pausa', 'Pulsa reproducir para continuar.'); });
-      player.on('error', () => setPlayerStatus('error', 'Señal no disponible', 'No pudimos conectar. Reintenta o elige otro canal.'));
+      player.on('playing', () => { if (selectedChannel && selectedChannel.type !== 'embed') setPlayerStatus('online', 'En reproducción', 'Disfruta de ' + selectedChannel.name + '.'); });
+      player.on('waiting', () => { if (selectedChannel && selectedChannel.type !== 'embed') setPlayerStatus('offline', 'Cargando señal…', 'Estamos conectando con el canal.'); });
+      player.on('pause', () => { if (selectedChannel && selectedChannel.type !== 'embed' && !player.error()) setPlayerStatus('offline', 'En pausa', 'Pulsa reproducir para continuar.'); });
+      player.on('error', () => { if (selectedChannel && selectedChannel.type !== 'embed') setPlayerStatus('error', 'Señal no disponible', 'No pudimos conectar. Reintenta o elige otro canal.'); });
     }
 
     const channels = [
@@ -432,9 +434,10 @@
       },
       {
         id: 2,
-        name: 'DSports',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/DSports.png',
-        url: 'http://cf.business-cdn-8k.com/live/e635d276aba4/17af17d2aa/2030133.m3u8'
+        name: 'ESPN',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/ESPN_wordmark.svg',
+        type: 'embed',
+        url: 'https://la18hd.su/vivo/canales.php?stream=espn'
       },
     ];
 
@@ -481,6 +484,21 @@
         button.setAttribute('aria-pressed', String(active));
       });
       document.getElementById('currentChannel').textContent = ch.name;
+      const frame = document.getElementById('embeddedPlayer');
+      const openSignal = document.getElementById('openSignal');
+      frame.hidden = true;
+      frame.removeAttribute('src');
+      openSignal.hidden = ch.type !== 'embed';
+      if (ch.type === 'embed') {
+        if (window.player) player.pause();
+        frame.title = 'Reproductor externo de ' + ch.name;
+        frame.src = ch.url;
+        frame.hidden = false;
+        openSignal.href = ch.url;
+        setPlayerStatus('offline', 'Reproductor externo', 'Usa los controles de la señal. Si no aparece, pulsa Abrir señal.');
+        return;
+      }
+      openSignal.removeAttribute('href');
       if (!window.player) initPlayer();
       if (!window.player) return;
       setPlayerStatus('offline', 'Cargando señal…', 'Conectando con ' + ch.name + '…');
