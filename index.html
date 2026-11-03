@@ -312,6 +312,63 @@
       .channel-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .channel-item { min-height: 130px; }
     }
+    /* Keep the video in view; only the channel grid scrolls. */
+    html { height: 100%; }
+    body { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+    .main-container { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); width: 100%; height: 100%; min-height: 0; margin: 0 auto; align-items: stretch; }
+    .player-section { min-height: 0; display: flex; flex-direction: column; align-items: stretch; }
+    .player-heading, .player-feedback { flex: 0 0 auto; }
+    .player-container { flex: 0 0 auto; align-self: center; width: min(100%, calc(max(100px, 100dvh - 250px) * 16 / 9)); }
+    .channel-section { min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+    .section-heading, .channel-search { flex: 0 0 auto; }
+    .channel-list { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; scrollbar-width: thin; scrollbar-color: #44694e transparent; align-content: start; scroll-padding: .5rem; padding: .25rem; -webkit-overflow-scrolling: touch; }
+    .channel-item { min-width: 0; }
+    .channel-search input { flex: 1 1 auto; }
+    .empty-state { flex: 0 0 auto; margin: 0; }
+    .footer { margin-top: 0; padding-top: .35rem; padding-bottom: max(.35rem, env(safe-area-inset-bottom)); }
+    .footer .row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: .5rem; }
+    .footer .row > div { width: auto; padding-inline: 0; }
+    .footer .row { margin-inline: 0; }
+    .footer p { margin: 0; }
+    @media (max-width: 1023px) and (orientation: portrait) {
+      .main-container { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+      .player-section, .channel-section { width: 100%; }
+      .player-container { width: min(100%, calc(max(100px, 100dvh - 480px) * 16 / 9)); }
+      .channel-section { padding: .75rem; }
+      .section-heading { margin-bottom: .5rem; }
+      .channel-search { margin-bottom: .5rem; }
+    }
+    @media (max-width: 600px) and (orientation: portrait) {
+      .header .row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: .5rem; }
+      .header .row { margin-inline: 0; }
+      .header .row > div { width: auto; min-width: 0; padding-inline: 0; }
+      .logo { white-space: nowrap; font-size: 1.15rem; }
+      #connectionStatus { margin-top: 0; max-width: 150px; font-size: .65rem; padding: .4rem .5rem; }
+      .status-indicator { flex-shrink: 0; }
+    }
+    @media (orientation: portrait) and (max-height: 650px) {
+      .eyebrow { display: none; }
+      .player-heading { margin-bottom: .35rem; }
+      .player-feedback { margin-top: .35rem; }
+      #playerHint { font-size: .75rem; }
+    }
+    @media (orientation: landscape) and (max-height: 600px) {
+      .header { padding-block: .35rem; }
+      .header .row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; }
+      .header .row { margin-inline: 0; }
+      .header .row > div { width: auto; padding-inline: 0; }
+      .slogan, .eyebrow { display: none; }
+      .logo { font-size: 1.2rem; }
+      #connectionStatus { margin-top: 0; font-size: .7rem; }
+      .main-container { padding: .35rem; grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr); }
+      .player-heading { margin-bottom: .35rem; }
+      .player-feedback { margin-top: .35rem; }
+      .player-container { width: min(100%, calc(max(80px, 100dvh - 210px) * 16 / 9)); }
+      .channel-section { padding: .5rem; }
+      .channel-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .channel-item { min-height: 110px; padding: .6rem; }
+      .channel-logo { height: 45px; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .matrix-rain { display: none; }
@@ -418,7 +475,7 @@
         setPlayerStatus('error', 'Reproductor no disponible', 'No se pudo cargar el reproductor. Revisa tu conexión y vuelve a intentarlo.');
         return;
       }
-      window.player = videojs('iptv-player', { fluid: false, responsive: true });
+      window.player = videojs('iptv-player', { fluid: false, responsive: true, controlBar: { pictureInPictureToggle: true } });
       player.on('playing', () => { if (selectedChannel && selectedChannel.type !== 'embed') setPlayerStatus('online', 'En reproducción', 'Disfruta de ' + selectedChannel.name + '.'); });
       player.on('waiting', () => { if (selectedChannel && selectedChannel.type !== 'embed') setPlayerStatus('offline', 'Cargando señal…', 'Estamos conectando con el canal.'); });
       player.on('pause', () => { if (selectedChannel && selectedChannel.type !== 'embed' && !player.error()) setPlayerStatus('offline', 'En pausa', 'Pulsa reproducir para continuar.'); });
