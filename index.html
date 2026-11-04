@@ -369,6 +369,27 @@
       .channel-item { min-height: 110px; padding: .6rem; }
       .channel-logo { height: 45px; }
     }
+    /* Compact portrait controls leave room to browse channels. */
+    @media (max-width: 1023px) and (orientation: portrait) {
+      .player-section { position: relative; }
+      .eyebrow { display: none; }
+      .player-heading { min-height: 44px; margin-bottom: .25rem; padding-right: 110px; }
+      #currentChannel { font-size: 1.1rem; }
+      .player-feedback { position: absolute; top: .5rem; right: .5rem; min-height: 0; margin: 0; }
+      #playerHint { display: none; }
+      #retryChannel { min-height: 44px; padding: .35rem .65rem; font-size: .75rem; }
+      .channel-section { padding: .5rem; }
+      .section-heading { margin-bottom: .35rem; }
+      .section-heading h2 { font-size: .9rem; }
+      .channel-search { margin-bottom: .35rem; }
+      .channel-search input { min-height: 44px; padding: .4rem .7rem; border-radius: 12px; }
+      .clear-search { width: 44px; min-height: 44px; }
+      .channel-list { gap: .5rem; }
+      .channel-item { min-height: 104px; padding: .65rem; gap: .4rem; }
+      .channel-logo { height: 44px; }
+      .channel-name { font-size: .8rem; }
+      .footer .btn { min-height: 44px; padding: .35rem .65rem; font-size: .75rem; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .matrix-rain { display: none; }
