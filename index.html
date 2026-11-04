@@ -6,8 +6,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Fsociety TV" />
-  <link rel="apple-touch-icon" href="https://fsociety.lat/images/logo.png" />
-  <link rel="icon" type="image/jpg" href="https://fsociety.lat/images/logo.png"/>
+  <meta name="theme-color" content="#0c0c0c" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="./icons/app-192.png"/>
 
   <title>Fsociety TV | Hackeando la señal</title>
 
@@ -394,6 +396,16 @@
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .matrix-rain { display: none; }
     }
+    .footer-actions { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
+    .install-help { width: min(90vw, 440px); max-height: 85dvh; overflow: auto; border: 1px solid #37533e; border-radius: 20px; padding: 1.5rem; color: var(--text-primary); background: #101713; }
+    .install-help::backdrop { background: #000b; }
+    .install-help h2 { color: var(--accent-green); font-size: 1.25rem; }
+    .install-help p { font-size: .9rem; }
+    @media (max-width: 600px) {
+      .footer .row > div:first-child { display: none; }
+      .footer .row > .footer-actions { width: 100%; justify-content: space-between; }
+      .footer-actions .btn { min-height: 44px; font-size: .75rem; padding: .35rem .65rem; }
+    }
   </style>
 </head>
 
@@ -457,7 +469,8 @@
     <div class="container">
       <div class="row">
         <div class="col-md-6"><p>Fsociety TV &copy; <span id="currentYear"></span></p></div>
-        <div class="col-md-6 text-md-end">
+        <div class="col-md-6 text-md-end footer-actions">
+          <button type="button" id="installApp" class="btn btn-sm btn-fsociety">Instalar app</button>
           <a href="https://paypal.me/fsociety" class="btn btn-sm btn-fsociety" target="_blank" rel="noopener">
             <i class="fas fa-donate me-1"></i>Donaciones
           </a>
@@ -465,6 +478,14 @@
       </div>
     </div>
   </footer>
+
+  <dialog id="installHelp" class="install-help" aria-labelledby="installTitle">
+    <h2 id="installTitle">Instalar Fsociety TV</h2>
+    <p id="installInstructions"></p>
+    <p>Ábrela desde su icono para usarla sin la barra del navegador. Los canales necesitan Internet; la instalación no elimina la publicidad de sus proveedores.</p>
+    <button type="button" id="closeInstallHelp" class="btn btn-fsociety">Entendido</button>
+  </dialog>
+  <script src="./pwa.js" defer></script>
 
   <!-- Reproductor -->
   <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
