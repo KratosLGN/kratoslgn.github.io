@@ -1,6 +1,6 @@
-const CACHE_NAME = 'fsociety-install-v1';
+const CACHE_NAME = 'fsociety-install-v2';
 const OFFLINE_URL = new URL('./offline.html', self.location.href).href;
-const INSTALL_ASSETS = ['./offline.html', './icons/app-192.png', './icons/app-512.png', './icons/app-maskable-512.png', './icons/apple-touch-icon.png'];
+const INSTALL_ASSETS = ['./offline.html', './icons/fsociety.png', './icons/fsociety.svg'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(INSTALL_ASSETS)));
